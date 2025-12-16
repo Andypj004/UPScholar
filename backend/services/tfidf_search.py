@@ -3,16 +3,16 @@ from collections import Counter
 from typing import List, Tuple
 
 def obtenerVocabulario(documentos):
-    """Función para obtener el vocabulario único a partir de una lista de documentos procesados"""
+    """Function to get the unique vocabulary from a list of processed documents"""
     try:
         vocabulario = sorted(list({token for doc in documentos for token in doc}))
         return vocabulario
     except Exception as error:
-        print("Error en obtener vocabulario:", error)
+        print("Error getting vocabulary:", error)
         return []
 
 def obtenerMatrizFrecuenciaTF(documentos):
-    """Función para obtener la matriz de frecuencia TF"""
+    """Function to get the TF frequency matrix"""
     vocabulario = obtenerVocabulario(documentos)
     numFilas, numColumnas = len(vocabulario), len(documentos)
     matrizTF = np.zeros((numFilas, numColumnas), dtype=int)
@@ -26,7 +26,7 @@ def obtenerMatrizFrecuenciaTF(documentos):
     return matrizTF, vocabulario
 
 def obtenerMatrizDF(matTF):
-    """Función para obtener la matriz de DF a partir de la matriz de frecuencia TF"""
+    """Function to get the DF matrix from the TF frequency matrix"""
     try:
         numVocabulario, numDocumentos = matTF.shape
         matDF = np.zeros((numVocabulario, 1), dtype=int)
@@ -35,41 +35,41 @@ def obtenerMatrizDF(matTF):
             matDF[indFila, 0] = sum(fila != 0)
         return matDF
     except Exception as error:
-        print("Error en obtener matriz de DF:", error)
+        print("Error getting DF matrix:", error)
         return None
 
 def obtenerMatrizIDF(matDF, numDocumentos):
-    """Función para obtener la matriz de IDF"""
+    """Function to get the IDF matrix"""
     try:
         matIDF = np.log10(numDocumentos / matDF)
         return matIDF
     except Exception as error:
-        print("Error en obtener matriz de IDF:", error)
+        print("Error getting IDF matrix:", error)
         return None
 
 def obtenerModeloTFIDF(matWTF, matIDF):
-    """Función para obtener la matriz TF-IDF"""
+    """Function to get the TF-IDF matrix"""
     try:
         matTFIDF = matWTF * matIDF
         return matTFIDF
     except Exception as error:
-        print("Error en obtener modelo TF-IDF:", error)
+        print("Error getting TF-IDF model:", error)
         return None
 
 def obtenerMatrizVUnitario(matTFIDF):
-    """Función para obtener la matriz de vectores unitarios"""
+    """Function to get the unit vectors matrix"""
     try:
         modulo = np.linalg.norm(matTFIDF, axis=0)
         modulo = np.where(modulo == 0, 1, modulo)
         matVUnitario = matTFIDF / modulo
         return matVUnitario
     except Exception as error:
-        print("Error en obtener matriz de vectores unitarios:", error)
+        print("Error getting unit vectors matrix:", error)
         return None
 
 def similitud_jaccard(set1: set, set2: set) -> float:
     """
-    Calcula la similitud de Jaccard entre dos conjuntos
+    Calculates Jaccard similarity between two sets
     Jaccard = |A ∩ B| / |A ∪ B|
     """
     if len(set1) == 0 and len(set2) == 0:
@@ -84,102 +84,102 @@ def similitud_jaccard(set1: set, set2: set) -> float:
     return interseccion / union
 
 def similitud_coseno_vectorial(matriz_v_unitario):
-    """Calcula la matriz de similitud usando coseno vectorial"""
+    """Calculates similarity matrix using vectorial cosine"""
     return np.dot(matriz_v_unitario.T, matriz_v_unitario)
 
 class TFIDFSearchEngine:
     def __init__(self, titles, keywords, abstracts):
         """
-        Inicializa el motor de búsqueda TF-IDF con ponderación
+        Initializes the TF-IDF search engine with weighting
         
         Args:
-            titles: Lista de títulos de documentos
-            keywords: Lista de palabras clave de documentos
-            abstracts: Lista de abstracts de documentos
+            titles: List of document titles
+            keywords: List of document keywords
+            abstracts: List of document abstracts
         """
         self.titles = titles
         self.keywords = keywords
         self.abstracts = abstracts
         
-        # Guardar versiones procesadas por separado
+        # Save separately processed versions
         self.processed_titles = None
         self.processed_keywords = None
         self.processed_abstracts = None
         
-        # Índices TF-IDF solo para abstracts (60%)
+        # TF-IDF indices only for abstracts (60%)
         self.vocabulario_abstracts = None
         self.matriz_tfidf_abstracts = None
         self.matriz_v_unitario_abstracts = None
         self.matriz_similitud_abstracts = None
         
-        # Pesos para combinación
+        # Weights for combination
         self.peso_title = 0.15      # 15%
         self.peso_keywords = 0.25   # 25%
         self.peso_abstract = 0.60   # 60%
         
     def build_index(self, processed_titles, processed_keywords, processed_abstracts):
         """
-        Construye los índices necesarios
+        Builds the necessary indices
         
         Args:
-            processed_titles: Títulos procesados (tokenizados)
-            processed_keywords: Keywords procesadas (tokenizadas)
-            processed_abstracts: Abstracts procesados (tokenizados)
+            processed_titles: Processed titles (tokenized)
+            processed_keywords: Processed keywords (tokenized)
+            processed_abstracts: Processed abstracts (tokenized)
         """
         self.processed_titles = processed_titles
         self.processed_keywords = processed_keywords
         self.processed_abstracts = processed_abstracts
         
-        print("Construyendo índices TF-IDF...")
+        print("Building TF-IDF indices...")
         
-        # Construir TF-IDF solo para abstracts
+        # Build TF-IDF only for abstracts
         matriz_tf, self.vocabulario_abstracts = obtenerMatrizFrecuenciaTF(processed_abstracts)
         matriz_df = obtenerMatrizDF(matriz_tf)
         matriz_idf = obtenerMatrizIDF(matriz_df, len(processed_abstracts))
         self.matriz_tfidf_abstracts = obtenerModeloTFIDF(matriz_tf, matriz_idf)
         
-        # Vectores unitarios para similitud coseno
+        # Unit vectors for cosine similarity
         self.matriz_v_unitario_abstracts = obtenerMatrizVUnitario(self.matriz_tfidf_abstracts)
         self.matriz_similitud_abstracts = similitud_coseno_vectorial(self.matriz_v_unitario_abstracts)
         
-        # Poner diagonal en 0
+        # Set diagonal to 0
         np.fill_diagonal(self.matriz_similitud_abstracts, 0)
         
-        print(f"✓ Índices construidos (vocabulario: {len(self.vocabulario_abstracts)} términos)")
+        print(f"✓ Indices built (vocabulary: {len(self.vocabulario_abstracts)} terms)")
         
     def calcular_similitud_ponderada(self, query_title: List[str], 
                                      query_keywords: List[str], 
                                      query_abstract: List[str],
                                      doc_index: int) -> float:
         """
-        Calcula similitud ponderada combinando:
-        - Jaccard para títulos (15%)
-        - Jaccard para keywords (25%)
-        - Coseno TF-IDF para abstracts (60%)
+        Calculates weighted similarity combining:
+        - Jaccard for titles (15%)
+        - Jaccard for keywords (25%)
+        - Cosine TF-IDF for abstracts (60%)
         
         Args:
-            query_title: Tokens del título de la consulta
-            query_keywords: Tokens de las keywords de la consulta
-            query_abstract: Tokens del abstract de la consulta
-            doc_index: Índice del documento a comparar
+            query_title: Tokens of query title
+            query_keywords: Tokens of query keywords
+            query_abstract: Tokens of query abstract
+            doc_index: Document index to compare
             
         Returns:
-            Similitud ponderada total
+            Total weighted similarity
         """
-        # 1. Similitud Jaccard para título (15%)
+        # 1. Jaccard similarity for title (15%)
         sim_title = similitud_jaccard(
             set(query_title),
             set(self.processed_titles[doc_index])
         )
         
-        # 2. Similitud Jaccard para keywords (25%)
+        # 2. Jaccard similarity for keywords (25%)
         sim_keywords = similitud_jaccard(
             set(query_keywords),
             set(self.processed_keywords[doc_index])
         )
         
-        # 3. Similitud Coseno TF-IDF para abstract (60%)
-        # Crear vector TF-IDF para la consulta
+        # 3. Cosine TF-IDF similarity for abstract (60%)
+        # Create TF-IDF vector for query
         indice_vocabulario = {termino: i for i, termino in enumerate(self.vocabulario_abstracts)}
         query_vector = np.zeros(len(self.vocabulario_abstracts))
         
@@ -188,18 +188,18 @@ class TFIDFSearchEngine:
                 i = indice_vocabulario[termino]
                 query_vector[i] = self.matriz_tfidf_abstracts[i, doc_index]
         
-        # Normalizar vector de consulta
+        # Normalize query vector
         norma_query = np.linalg.norm(query_vector)
         if norma_query > 0:
             query_vector_norm = query_vector / norma_query
         else:
             query_vector_norm = query_vector
         
-        # Calcular similitud coseno
+        # Calculate cosine similarity
         doc_vector_norm = self.matriz_v_unitario_abstracts[:, doc_index]
         sim_abstract = np.dot(query_vector_norm, doc_vector_norm)
         
-        # Combinar con pesos
+        # Combine with weights
         similitud_total = (
             self.peso_title * sim_title +
             self.peso_keywords * sim_keywords +
@@ -211,16 +211,16 @@ class TFIDFSearchEngine:
     def search(self, query_title: List[str], query_keywords: List[str], 
                query_abstract: List[str], top_k: int = 10) -> List[Tuple[int, float]]:
         """
-        Busca documentos similares usando ponderación 15-25-60
+        Searches similar documents using 15-25-60 weighting
         
         Args:
-            query_title: Tokens procesados del título
-            query_keywords: Tokens procesados de las keywords
-            query_abstract: Tokens procesados del abstract
-            top_k: Número de documentos a retornar
+            query_title: Processed tokens of title
+            query_keywords: Processed tokens of keywords
+            query_abstract: Processed tokens of abstract
+            top_k: Number of documents to return
             
         Returns:
-            Lista de tuplas (índice_documento, similitud_ponderada)
+            List of tuples (document_index, weighted_similarity)
         """
         similitudes = []
         
@@ -233,7 +233,7 @@ class TFIDFSearchEngine:
             )
             similitudes.append((doc_idx, sim))
         
-        # Ordenar por similitud descendente
+        # Sort by descending similarity
         similitudes.sort(key=lambda x: x[1], reverse=True)
         
         return similitudes[:top_k]
@@ -241,30 +241,30 @@ class TFIDFSearchEngine:
     def get_similar_documents(self, doc_index: int, top_k: int = 3, 
                             exclude_indices: set = None) -> List[Tuple[int, float]]:
         """
-        Obtiene documentos similares usando similitud de abstracts
+        Gets similar documents using abstract similarity
         
         Args:
-            doc_index: Índice del documento
-            top_k: Número de documentos similares a retornar
-            exclude_indices: Conjunto de índices a excluir
+            doc_index: Document index
+            top_k: Number of similar documents to return
+            exclude_indices: Set of indices to exclude
         
         Returns:
-            Lista de tuplas (índice_documento, similitud)
+            List of tuples (document_index, similarity)
         """
         if exclude_indices is None:
             exclude_indices = set()
         
-        # Usar matriz de similitud pre-calculada de abstracts
+        # Use pre-calculated similarity matrix of abstracts
         similitudes = self.matriz_similitud_abstracts[doc_index, :]
         
-        # Crear lista excluyendo índices especificados
+        # Create list excluding specified indices
         ranking = [
             (i, similitudes[i]) 
             for i in range(len(similitudes)) 
             if i not in exclude_indices and i != doc_index
         ]
         
-        # Ordenar por similitud descendente
+        # Sort by descending similarity
         ranking.sort(key=lambda x: x[1], reverse=True)
         
         return ranking[:top_k]
