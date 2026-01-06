@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UPScholar - Buscador de Documentos Científicos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            background: white;
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        h1 {
+            color: #2d3748;
+            font-size: 28px;
+        }
+
+        .subtitle {
+            color: #718096;
+            font-size: 14px;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        input[type="text"], select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        input[type="text"]:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .method-selector {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .method-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .method-option:hover {
+            border-color: #667eea;
+            background: #f7fafc;
+        }
+
+        .method-option.active {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .method-option input[type="radio"] {
+            display: none;
+        }
+
+        .method-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .method-description {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .embedding-config {
+            display: none;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f7fafc;
+            border-radius: 8px;
+        }
+
+        .embedding-config.active {
+            display: block;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .results-info {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .result-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .result-header {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+
+        .result-number {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .result-content {
+            flex: 1;
+        }
+
+        .result-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+            line-height: 1.4;
+        }
+
+        .keywords {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+
+        .keyword {
+            padding: 4px 12px;
+            background: #ebf4ff;
+            color: #3182ce;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .abstract {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .abstract.collapsed {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .toggle-abstract {
+            color: #667eea;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .toggle-abstract:hover {
+            text-decoration: underline;
+        }
+
+        .metadata {
+            display: flex;
+            gap: 20px;
+            color: #718096;
+            font-size: 14px;
+            margin-top: 15px;
+        }
+
+        .similar-docs {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 2px solid #e2e8f0;
+        }
+
+        .similar-docs h4 {
+            color: #2d3748;
+            margin-bottom: 15px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .similar-item {
+            background: #f7fafc;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .similar-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .similar-number {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 24px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-right: 10px;
+        }
+
+        .similar-title {
+            color: #2d3748;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .similar-meta {
+            color: #718096;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .empty-icon {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+        }
+
+        .empty-title {
+            font-size: 24px;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .empty-text {
+            color: #718096;
+        }
+
+        footer {
+            text-align: center;
+            color: white;
+            padding: 20px;
+            margin-top: 40px;
+        }
+
+        @media (max-width: 768px) {
+            .method-selector {
+                flex-direction: column;
+            }
+            
+            .result-header {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="header-content">
+                <div class="logo">📚</div>
+                <div>
+                    <h1>UPScholar</h1>
+                    <p class="subtitle">Buscador Inteligente de Documentos Científicos</p>
+                </div>
+            </div>
+        </header>
+
+        <div class="search-box">
+            <div class="input-group">
+                <label for="query">Ingrese su consulta</label>
+                <input type="text" id="query" placeholder="Ej: machine learning applications in healthcare">
+            </div>
+
+            <div class="method-selector">
+                <label class="method-option active" id="method-tfidf">
+                    <input type="radio" name="method" value="tfidf" checked>
+                    <div class="method-title">TF-IDF Clásico</div>
+                    <div class="method-description">Búsqueda basada en frecuencia de términos</div>
+                </label>
+                
+                <label class="method-option" id="method-embedding">
+                    <input type="radio" name="method" value="embedding">
+                    <div class="method-title">🤖 Embeddings (BERT)</div>
+                    <div class="method-description">Búsqueda semántica con inteligencia artificial</div>
+                </label>
+            </div>
+
+            <div class="embedding-config" id="embedding-config">
+                <label for="embedding-model">Modelo de Embedding</label>
+                <select id="embedding-model">
+                    <option value="all-MiniLM-L6-v2">all-MiniLM-L6-v2 (Rápido, 384 dims) - Recomendado</option>
+                    <option value="all-mpnet-base-v2">all-mpnet-base-v2 (Mejor calidad, 768 dims)</option>
+                    <option value="paraphrase-multilingual-MiniLM-L12-v2">paraphrase-multilingual (Multiidioma)</option>
+                    <option value="bert-base-nli-mean-tokens">bert-base-nli-mean-tokens (BERT clásico)</option>
+                </select>
+            </div>
+
+            <button id="search-btn" onclick="search()">Buscar</button>
+        </div>
+
+        <div id="error-container"></div>
+        <div id="loading-container"></div>
+        <div id="results-container"></div>
+    </div>
+
+    <footer>
+        <p>UPScholar - Sistema de Búsqueda Inteligente de Documentos Científicos</p>
+        <p>Implementado con TF-IDF y Embeddings BERT</p>
+    </footer>
+
+    <script>
+        // Detectar si estamos en Docker o desarrollo local
+        const API_URL = window.location.hostname === 'localhost' && window.location.port === '80' 
+            ? 'http://localhost:8000'  // Docker con nginx
+            : 'http://localhost:8000'; // Desarrollo local
+
+        // Manejo de selección de método
+        document.querySelectorAll('.method-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.method-option').forEach(opt => opt.classList.remove('active'));
+                this.classList.add('active');
+                this.querySelector('input[type="radio"]').checked = true;
+                
+                const method = this.querySelector('input[type="radio"]').value;
+                const embeddingConfig = document.getElementById('embedding-config');
+                
+                if (method === 'embedding') {
+                    embeddingConfig.classList.add('active');
+                } else {
+                    embeddingConfig.classList.remove('active');
+                }
+            });
+        });
+
+        // Búsqueda al presionar Enter
+        document.getElementById('query').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                search();
+            }
+        });
+
+        async function search() {
+            const query = document.getElementById('query').value.trim();
+            const method = document.querySelector('input[name="method"]:checked').value;
+            const embeddingModel = document.getElementById('embedding-model').value;
+
+            if (!query) {
+                showError('Por favor ingrese una consulta');
+                return;
+            }
+
+            showLoading();
+            clearError();
+            clearResults();
+
+            try {
+                const response = await fetch(`${API_URL}/search`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        query: query,
+                        method: method,
+                        top_k: 10,
+                        embedding_model: embeddingModel
+                    })
+                });
+
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.detail || 'Error en la búsqueda');
+                }
+
+                const data = await response.json();
+                displayResults(data);
+            } catch (error) {
+                showError(`Error: ${error.message}. Asegúrese de que el backend esté ejecutándose.`);
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function showLoading() {
+            document.getElementById('loading-container').innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Buscando documentos...</p>
+                </div>
+            `;
+        }
+
+        function hideLoading() {
+            document.getElementById('loading-container').innerHTML = '';
+        }
+
+        function showError(message) {
+            document.getElementById('error-container').innerHTML = `
+                <div class="error">${message}</div>
+            `;
+        }
+
+        function clearError() {
+            document.getElementById('error-container').innerHTML = '';
+        }
+
+        function clearResults() {
+            document.getElementById('results-container').innerHTML = '';
+        }
+
+        function displayResults(data) {
+            const container = document.getElementById('results-container');
+
+            if (data.total_results === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-icon">🔍</div>
+                        <h2 class="empty-title">No se encontraron resultados</h2>
+                        <p class="empty-text">Intente con otros términos de búsqueda</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="results-info">
+                    <strong>${data.total_results}</strong> resultados para 
+                    <strong>"${data.query}"</strong> usando 
+                    <strong>${data.method.toUpperCase()}</strong>
+                    ${data.embedding_model ? ` (Modelo: ${data.embedding_model})` : ''}
+                </div>
+            `;
+
+            data.results.forEach((doc, index) => {
+                const keywords = doc.keywords ? doc.keywords.split(',').slice(0, 5) : [];
+                
+                html += `
+                    <div class="result-card">
+                        <div class="result-header">
+                            <div class="result-number">${index + 1}</div>
+                            <div class="result-content">
+                                <h3 class="result-title">${escapeHtml(doc.title)}</h3>
+                                
+                                ${keywords.length > 0 ? `
+                                    <div class="keywords">
+                                        ${keywords.map(k => `<span class="keyword">${escapeHtml(k.trim())}</span>`).join('')}
+                                    </div>
+                                ` : ''}
+                                
+                                <div class="abstract collapsed" id="abstract-${doc.id}">
+                                    ${escapeHtml(doc.abstract)}
+                                </div>
+                                <span class="toggle-abstract" onclick="toggleAbstract(${doc.id})">
+                                    Ver más
+                                </span>
+                                
+                                <div class="metadata">
+                                    <span>Puntuación: ${doc.score.toFixed(4)}</span>
+                                    <span>•</span>
+                                    <span>ID: ${doc.id}</span>
+                                </div>
+
+                                ${doc.similar_docs && doc.similar_docs.length > 0 ? `
+                                    <div class="similar-docs">
+                                        <h4>📄 Artículos Relacionados</h4>
+                                        ${doc.similar_docs.map((sim, idx) => `
+                                            <div class="similar-item">
+                                                <span class="similar-number">${idx + 1}</span>
+                                                <span class="similar-title">${escapeHtml(sim.title)}</span>
+                                                <div class="similar-meta">
+                                                    Similitud: ${sim.score.toFixed(4)} • ID: ${sim.id}
+                                                </div>
+                                            </div>
+                                        `).join('')}
+                                    </div>
+                                ` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            container.innerHTML = html;
+        }
+
+        function toggleAbstract(docId) {
+            const abstract = document.getElementById(`abstract-${docId}`);
+            const toggle = abstract.nextElementSibling;
+            
+            if (abstract.classList.contains('collapsed')) {
+                abstract.classList.remove('collapsed');
+                toggle.textContent = 'Ver menos';
+            } else {
+                abstract.classList.add('collapsed');
+                toggle.textContent = 'Ver más';
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Cargar estado inicial al cargar la página
+        window.addEventListener('load', function() {
+            fetch(`${API_URL}/`)
+                .then(response => response.json())
+                .then(data => {
+                    console.log('Estado del sistema:', data);
+                    if (!data.embedding_ready) {
+                        console.warn('Motor de embeddings no disponible');
+                    }
+                })
+                .catch(error => {
+                    console.error('No se pudo conectar con el backend:', error);
+                });
+        });
+    </script>
+</body>
+</html>
