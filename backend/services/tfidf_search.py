@@ -111,7 +111,9 @@ class TFIDFSearchEngine:
         self.matriz_tfidf_abstracts = None
         self.matriz_v_unitario_abstracts = None
         self.matriz_similitud_abstracts = None
-        
+        # IDF matrix for abstracts
+        self.matriz_idf_abstracts = None
+        self.indice_vocabulario_abstracts = None
         # Weights for combination
         self.peso_title = 0.15      # 15%
         self.peso_keywords = 0.25   # 25%
@@ -136,7 +138,10 @@ class TFIDFSearchEngine:
         matriz_tf, self.vocabulario_abstracts = obtenerMatrizFrecuenciaTF(processed_abstracts)
         matriz_df = obtenerMatrizDF(matriz_tf)
         matriz_idf = obtenerMatrizIDF(matriz_df, len(processed_abstracts))
+        self.matriz_idf_abstracts = matriz_idf  # guardar para consultas
         self.matriz_tfidf_abstracts = obtenerModeloTFIDF(matriz_tf, matriz_idf)
+        # Map vocabulary to indices
+        self.indice_vocabulario_abstracts = {t: i for i, t in enumerate(self.vocabulario_abstracts)}
         
         # Unit vectors for cosine similarity
         self.matriz_v_unitario_abstracts = obtenerMatrizVUnitario(self.matriz_tfidf_abstracts)
@@ -178,34 +183,34 @@ class TFIDFSearchEngine:
             set(self.processed_keywords[doc_index])
         )
         
-        # 3. Cosine TF-IDF similarity for abstract (60%)
-        # Create TF-IDF vector for query
-        indice_vocabulario = {termino: i for i, termino in enumerate(self.vocabulario_abstracts)}
-        query_vector = np.zeros(len(self.vocabulario_abstracts))
-        
+        # 3. Cosine similarity for abstracts (60%)
+        V = len(self.vocabulario_abstracts)
+        query_tf = np.zeros(V, dtype=float)
         for termino in query_abstract:
-            if termino in indice_vocabulario:
-                i = indice_vocabulario[termino]
-                query_vector[i] = self.matriz_tfidf_abstracts[i, doc_index]
-        
+            idx = self.indice_vocabulario_abstracts.get(termino)
+            if idx is not None:
+                query_tf[idx] += 1.0
+
+        # TF-IDF for query
+        # self.matriz_idf_abstracts tiene forma (V,1)
+        query_tfidf = query_tf * self.matriz_idf_abstracts.flatten()
+
         # Normalize query vector
-        norma_query = np.linalg.norm(query_vector)
+        norma_query = np.linalg.norm(query_tfidf)
         if norma_query > 0:
-            query_vector_norm = query_vector / norma_query
+            query_vector_norm = query_tfidf / norma_query
         else:
-            query_vector_norm = query_vector
-        
-        # Calculate cosine similarity
+            query_vector_norm = query_tfidf
+
         doc_vector_norm = self.matriz_v_unitario_abstracts[:, doc_index]
-        sim_abstract = np.dot(query_vector_norm, doc_vector_norm)
-        
-        # Combine with weights
+        sim_abstract = float(np.dot(query_vector_norm, doc_vector_norm))
+
+        # Weighted total similarity
         similitud_total = (
             self.peso_title * sim_title +
             self.peso_keywords * sim_keywords +
             self.peso_abstract * sim_abstract
         )
-        
         return similitud_total
     
     def search(self, query_title: List[str], query_keywords: List[str], 
