@@ -64,7 +64,7 @@ async def startup_event():
         tfidf_engine.build_index(processed_titles, processed_keywords, processed_abstracts)
         
         # Get vocabulary size - adjust based on actual TFIDFSearchEngine attributes
-        vocab_size = len(tfidf_engine.tfidf_vectorizer.vocabulary_) if hasattr(tfidf_engine, 'tfidf_vectorizer') else 0
+        vocab_size = len(tfidf_engine.vocabulario_abstracts) if tfidf_engine.vocabulario_abstracts else 0
         print(f"   ✓ TF-IDF engine ready (vocabulary: {vocab_size} terms)\n")
         
         # Initialize embeddings manager
