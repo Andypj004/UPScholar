@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UPScholar - Buscador de Documentos Científicos</title>
+    <title>UPScholar - Scientific Document Search</title>
     <style>
         * {
             margin: 0;
@@ -13,9 +13,10 @@
 
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #f5f7fa;
             min-height: 100vh;
             padding: 20px;
+            color: #2c3e50;
         }
 
         .container {
@@ -25,10 +26,11 @@
 
         header {
             background: white;
-            border-radius: 15px;
+            border-radius: 8px;
             padding: 20px 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            border-left: 4px solid #34495e;
         }
 
         .header-content {
@@ -40,8 +42,8 @@
         .logo {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
+            background: #34495e;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -51,21 +53,22 @@
         }
 
         h1 {
-            color: #2d3748;
+            color: #2c3e50;
             font-size: 28px;
+            font-weight: 600;
         }
 
         .subtitle {
-            color: #718096;
+            color: #7f8c8d;
             font-size: 14px;
         }
 
         .search-box {
             background: white;
-            border-radius: 15px;
+            border-radius: 8px;
             padding: 30px;
             margin-bottom: 30px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .input-group {
@@ -76,22 +79,25 @@
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
-            color: #2d3748;
+            color: #2c3e50;
+            font-size: 14px;
         }
 
         input[type="text"], select {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 6px;
             font-size: 16px;
             transition: all 0.3s;
+            background: #ffffff;
+            color: #2c3e50;
         }
 
         input[type="text"]:focus, select:focus {
             outline: none;
-            border-color: #667eea;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            border-color: #34495e;
+            box-shadow: 0 0 0 3px rgba(52, 73, 94, 0.1);
         }
 
         .method-selector {
@@ -103,22 +109,23 @@
         .method-option {
             flex: 1;
             padding: 15px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
             cursor: pointer;
             transition: all 0.3s;
             text-align: center;
+            background: #ffffff;
         }
 
         .method-option:hover {
-            border-color: #667eea;
-            background: #f7fafc;
+            border-color: #95a5a6;
+            background: #f8f9fa;
         }
 
         .method-option.active {
-            border-color: #667eea;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+            border-color: #34495e;
+            background: #ecf0f1;
+            color: #2c3e50;
         }
 
         .method-option input[type="radio"] {
@@ -128,19 +135,22 @@
         .method-title {
             font-weight: 600;
             margin-bottom: 5px;
+            color: #2c3e50;
         }
 
         .method-description {
             font-size: 12px;
-            opacity: 0.8;
+            opacity: 0.7;
+            color: #7f8c8d;
         }
 
         .embedding-config {
             display: none;
             margin-top: 15px;
             padding: 15px;
-            background: #f7fafc;
-            border-radius: 8px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 3px solid #34495e;
         }
 
         .embedding-config.active {
@@ -150,19 +160,19 @@
         button {
             width: 100%;
             padding: 15px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #34495e;
             color: white;
             border: none;
-            border-radius: 8px;
+            border-radius: 6px;
             font-size: 16px;
             font-weight: 600;
             cursor: pointer;
-            transition: transform 0.2s;
+            transition: all 0.2s;
         }
 
         button:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            background: #2c3e50;
+            box-shadow: 0 4px 12px rgba(52, 73, 94, 0.2);
         }
 
         button:disabled {
@@ -174,15 +184,15 @@
             text-align: center;
             padding: 40px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .spinner {
             width: 50px;
             height: 50px;
-            border: 4px solid #e2e8f0;
-            border-top-color: #667eea;
+            border: 4px solid #ecf0f1;
+            border-top-color: #34495e;
             border-radius: 50%;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
@@ -193,33 +203,36 @@
         }
 
         .error {
-            background: #fed7d7;
-            color: #c53030;
+            background: #fadbd8;
+            color: #78281f;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 20px;
+            border-left: 4px solid #c0392b;
         }
 
         .results-info {
             background: white;
             padding: 15px 20px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            color: #2c3e50;
         }
 
         .result-card {
             background: white;
-            border-radius: 15px;
+            border-radius: 8px;
             padding: 25px;
             margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            transition: transform 0.2s;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+            border-left: 4px solid #ecf0f1;
         }
 
         .result-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+            border-left-color: #34495e;
         }
 
         .result-header {
@@ -231,14 +244,15 @@
         .result-number {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #34495e;
             color: white;
-            border-radius: 50%;
+            border-radius: 4px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
+            font-weight: 600;
             flex-shrink: 0;
+            font-size: 14px;
         }
 
         .result-content {
@@ -248,7 +262,7 @@
         .result-title {
             font-size: 18px;
             font-weight: 600;
-            color: #2d3748;
+            color: #2c3e50;
             margin-bottom: 10px;
             line-height: 1.4;
         }
@@ -262,16 +276,18 @@
 
         .keyword {
             padding: 4px 12px;
-            background: #ebf4ff;
-            color: #3182ce;
-            border-radius: 20px;
+            background: #ecf0f1;
+            color: #34495e;
+            border-radius: 4px;
             font-size: 12px;
+            border: 1px solid #bdc3c7;
         }
 
         .abstract {
-            color: #4a5568;
+            color: #555555;
             line-height: 1.6;
             margin-bottom: 15px;
+            font-size: 14px;
         }
 
         .abstract.collapsed {
@@ -282,7 +298,7 @@
         }
 
         .toggle-abstract {
-            color: #667eea;
+            color: #34495e;
             cursor: pointer;
             font-size: 14px;
             font-weight: 600;
@@ -290,34 +306,36 @@
 
         .toggle-abstract:hover {
             text-decoration: underline;
+            color: #2c3e50;
         }
 
         .metadata {
             display: flex;
             gap: 20px;
-            color: #718096;
-            font-size: 14px;
+            color: #7f8c8d;
+            font-size: 13px;
             margin-top: 15px;
         }
 
         .similar-docs {
             margin-top: 20px;
             padding-top: 20px;
-            border-top: 2px solid #e2e8f0;
+            border-top: 1px solid #ecf0f1;
         }
 
         .similar-docs h4 {
-            color: #2d3748;
+            color: #2c3e50;
             margin-bottom: 15px;
             font-size: 14px;
             font-weight: 600;
         }
 
         .similar-item {
-            background: #f7fafc;
+            background: #f8f9fa;
             padding: 12px;
-            border-radius: 8px;
+            border-radius: 6px;
             margin-bottom: 10px;
+            border-left: 2px solid #bdc3c7;
         }
 
         .similar-item:last-child {
@@ -328,9 +346,9 @@
             display: inline-block;
             width: 24px;
             height: 24px;
-            background: #667eea;
+            background: #95a5a6;
             color: white;
-            border-radius: 50%;
+            border-radius: 3px;
             text-align: center;
             line-height: 24px;
             font-size: 12px;
@@ -339,13 +357,13 @@
         }
 
         .similar-title {
-            color: #2d3748;
+            color: #2c3e50;
             font-weight: 500;
             font-size: 14px;
         }
 
         .similar-meta {
-            color: #718096;
+            color: #7f8c8d;
             font-size: 12px;
             margin-top: 5px;
         }
@@ -354,14 +372,14 @@
             text-align: center;
             padding: 60px 20px;
             background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
 
         .empty-icon {
             width: 80px;
             height: 80px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #ecf0f1;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -372,19 +390,20 @@
 
         .empty-title {
             font-size: 24px;
-            color: #2d3748;
+            color: #2c3e50;
             margin-bottom: 10px;
         }
 
         .empty-text {
-            color: #718096;
+            color: #7f8c8d;
         }
 
         footer {
             text-align: center;
-            color: white;
+            color: #7f8c8d;
             padding: 20px;
             margin-top: 40px;
+            font-size: 14px;
         }
 
         @media (max-width: 768px) {
@@ -405,42 +424,42 @@
                 <div class="logo">📚</div>
                 <div>
                     <h1>UPScholar</h1>
-                    <p class="subtitle">Buscador Inteligente de Documentos Científicos</p>
+                    <p class="subtitle">Intelligent Scientific Document Search</p>
                 </div>
             </div>
         </header>
 
         <div class="search-box">
             <div class="input-group">
-                <label for="query">Ingrese su consulta</label>
-                <input type="text" id="query" placeholder="Ej: machine learning applications in healthcare">
+                <label for="query">Enter your query</label>
+                <input type="text" id="query" placeholder="e.g.: machine learning applications in healthcare">
             </div>
 
             <div class="method-selector">
                 <label class="method-option active" id="method-tfidf">
                     <input type="radio" name="method" value="tfidf" checked>
-                    <div class="method-title">TF-IDF Clásico</div>
-                    <div class="method-description">Búsqueda basada en frecuencia de términos</div>
+                    <div class="method-title">Classic TF-IDF</div>
+                    <div class="method-description">Term frequency-based search</div>
                 </label>
                 
                 <label class="method-option" id="method-embedding">
                     <input type="radio" name="method" value="embedding">
-                    <div class="method-title">🤖 Embeddings (BERT)</div>
-                    <div class="method-description">Búsqueda semántica con inteligencia artificial</div>
+                    <div class="method-title">Embeddings</div>
+                    <div class="method-description">Semantic search with AI</div>
                 </label>
             </div>
 
             <div class="embedding-config" id="embedding-config">
-                <label for="embedding-model">Modelo de Embedding</label>
+                <label for="embedding-model">Embedding Model</label>
                 <select id="embedding-model">
-                    <option value="all-MiniLM-L6-v2">all-MiniLM-L6-v2 (Rápido, 384 dims) - Recomendado</option>
-                    <option value="all-mpnet-base-v2">all-mpnet-base-v2 (Mejor calidad, 768 dims)</option>
-                    <option value="paraphrase-multilingual-MiniLM-L12-v2">paraphrase-multilingual (Multiidioma)</option>
-                    <option value="bert-base-nli-mean-tokens">bert-base-nli-mean-tokens (BERT clásico)</option>
+                    <option value="all-MiniLM-L6-v2">all-MiniLM-L6-v2 (384 dims)</option>
+                    <option value="all-mpnet-base-v2">all-mpnet-base-v2 (768 dims)</option>
+                    <option value="paraphrase-multilingual-MiniLM-L12-v2">paraphrase-multilingual</option>
+                    <option value="bert-base-nli-mean-tokens">bert-base-nli-mean-tokens (BERT)</option>
                 </select>
             </div>
 
-            <button id="search-btn" onclick="search()">Buscar</button>
+            <button id="search-btn" onclick="search()">Search</button>
         </div>
 
         <div id="error-container"></div>
@@ -449,15 +468,13 @@
     </div>
 
     <footer>
-        <p>UPScholar - Sistema de Búsqueda Inteligente de Documentos Científicos</p>
-        <p>Implementado con TF-IDF y Embeddings BERT</p>
+        <p>UPScholar - Intelligent Scientific Document Search System</p>
+        <p>Implemented with TF-IDF and BERT Embeddings</p>
     </footer>
 
     <script>
-        // Detectar si estamos en Docker o desarrollo local
-        const API_URL = window.location.hostname === 'localhost' && window.location.port === '80' 
-            ? 'http://localhost:8000'  // Docker con nginx
-            : 'http://localhost:8000'; // Desarrollo local
+        // Usar siempre el proxy de Nginx
+        const API_URL = '/api';
 
         // Manejo de selección de método
         document.querySelectorAll('.method-option').forEach(option => {
@@ -477,7 +494,7 @@
             });
         });
 
-        // Búsqueda al presionar Enter
+        // Search on Enter key
         document.getElementById('query').addEventListener('keypress', function(e) {
             if (e.key === 'Enter') {
                 search();
@@ -490,7 +507,7 @@
             const embeddingModel = document.getElementById('embedding-model').value;
 
             if (!query) {
-                showError('Por favor ingrese una consulta');
+                showError('Please enter a query');
                 return;
             }
 
@@ -501,9 +518,7 @@
             try {
                 const response = await fetch(`${API_URL}/search`, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         query: query,
                         method: method,
@@ -514,13 +529,13 @@
 
                 if (!response.ok) {
                     const error = await response.json();
-                    throw new Error(error.detail || 'Error en la búsqueda');
+                    throw new Error(error.detail || 'Search error');
                 }
 
                 const data = await response.json();
                 displayResults(data);
             } catch (error) {
-                showError(`Error: ${error.message}. Asegúrese de que el backend esté ejecutándose.`);
+                showError(`Error: ${error.message}. Make sure the backend is running.`);
             } finally {
                 hideLoading();
             }
@@ -530,7 +545,7 @@
             document.getElementById('loading-container').innerHTML = `
                 <div class="loading">
                     <div class="spinner"></div>
-                    <p>Buscando documentos...</p>
+                    <p>Searching documents...</p>
                 </div>
             `;
         }
@@ -560,8 +575,8 @@
                 container.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">🔍</div>
-                        <h2 class="empty-title">No se encontraron resultados</h2>
-                        <p class="empty-text">Intente con otros términos de búsqueda</p>
+                        <h2 class="empty-title">No results found</h2>
+                        <p class="empty-text">Try different search terms</p>
                     </div>
                 `;
                 return;
@@ -569,10 +584,10 @@
 
             let html = `
                 <div class="results-info">
-                    <strong>${data.total_results}</strong> resultados para 
-                    <strong>"${data.query}"</strong> usando 
+                    <strong>${data.total_results}</strong> results for 
+                    <strong>"${data.query}"</strong> using 
                     <strong>${data.method.toUpperCase()}</strong>
-                    ${data.embedding_model ? ` (Modelo: ${data.embedding_model})` : ''}
+                    ${data.embedding_model ? ` (Model: ${data.embedding_model})` : ''}
                 </div>
             `;
 
@@ -596,24 +611,24 @@
                                     ${escapeHtml(doc.abstract)}
                                 </div>
                                 <span class="toggle-abstract" onclick="toggleAbstract(${doc.id})">
-                                    Ver más
+                                    Show more
                                 </span>
                                 
                                 <div class="metadata">
-                                    <span>Puntuación: ${doc.score.toFixed(4)}</span>
+                                    <span>Score: ${doc.score.toFixed(4)}</span>
                                     <span>•</span>
                                     <span>ID: ${doc.id}</span>
                                 </div>
 
                                 ${doc.similar_docs && doc.similar_docs.length > 0 ? `
                                     <div class="similar-docs">
-                                        <h4>📄 Artículos Relacionados</h4>
+                                        <h4>📄 Related Articles</h4>
                                         ${doc.similar_docs.map((sim, idx) => `
                                             <div class="similar-item">
                                                 <span class="similar-number">${idx + 1}</span>
                                                 <span class="similar-title">${escapeHtml(sim.title)}</span>
                                                 <div class="similar-meta">
-                                                    Similitud: ${sim.score.toFixed(4)} • ID: ${sim.id}
+                                                    Similarity: ${sim.score.toFixed(4)} • ID: ${sim.id}
                                                 </div>
                                             </div>
                                         `).join('')}
@@ -634,10 +649,10 @@
             
             if (abstract.classList.contains('collapsed')) {
                 abstract.classList.remove('collapsed');
-                toggle.textContent = 'Ver menos';
+                toggle.textContent = 'Show less';
             } else {
                 abstract.classList.add('collapsed');
-                toggle.textContent = 'Ver más';
+                toggle.textContent = 'Show more';
             }
         }
 
@@ -652,13 +667,13 @@
             fetch(`${API_URL}/`)
                 .then(response => response.json())
                 .then(data => {
-                    console.log('Estado del sistema:', data);
+                    console.log('System status:', data);
                     if (!data.embedding_ready) {
-                        console.warn('Motor de embeddings no disponible');
+                        console.warn('Embedding engine not available');
                     }
                 })
                 .catch(error => {
-                    console.error('No se pudo conectar con el backend:', error);
+                    console.error('Could not connect to backend:', error);
                 });
         });
     </script>
