@@ -152,6 +152,7 @@ curl -s http://localhost:8000/search \
 - “Embeddings not generated”: the manager will generate and save `.npy`. Check logs in `EmbeddingManager.get_engine`.
 - NLTK stopwords locally: download with `nltk.download('stopwords')` and `nltk.download('punkt')`.
 - Check status via GET `/`: available/loaded models and total documents.
+- First run may be slow due to index/embedding generation; subsequent runs load from cache.s
 
 ---
 
